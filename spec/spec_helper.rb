@@ -100,3 +100,7 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 end
+
+def json_response
+  JSON.parse(last_response.body)
+end
