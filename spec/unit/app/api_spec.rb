@@ -39,7 +39,8 @@ module ExpenseTracker
         before do
           allow(ledger).to receive(:record)
                              .with(expense)
-                             .and_return(RecordResult.new(false, 417, 'Expense incomplete')) end
+                             .and_return(RecordResult.new(false, 417, 'Expense incomplete'))
+        end
 
         it "returns an error message" do
           post '/expenses', JSON.generate(expense)
@@ -55,14 +56,37 @@ module ExpenseTracker
     end
 
     describe 'GET /expenses/:date' do
+      let(:date) { Date.civil(2020, 01, 01) }
       context 'when expenses exist on the given date' do
-        it 'returns the expense records as JSON'
-        it 'responds with a 200 (OK)'
+        before do
+          allow(ledger).to receive(:expenses_on).with(date).and_return([{ "some" => "data"}])
+        end
+
+        it 'returns the expense records as JSON' do
+          get "/expenses/2020-01-01"
+          expect(json_response).not_to be_empty
+        end
+
+        it 'responds with a 200 (OK)' do
+          get "/expenses/2020-01-01"
+          expect(last_response.status).to eq(200)
+        end
       end
 
       context 'when there are no expenses on the given date' do
-        it 'returns an empty array as JSON'
-        it 'responds with a 200 (OK)'
+        before do
+          allow(ledger).to receive(:expenses_on).with(date).and_return([])
+        end
+
+        it 'returns an empty array as JSON' do
+          get "/expenses/2020-01-01"
+          expect(json_response).to be_empty
+        end
+
+        it 'responds with a 200 (OK)' do
+          get "/expenses/2020-01-01"
+          expect(last_response.status).to eq(200)
+        end
       end
     end
   end
